@@ -1,0 +1,220 @@
+#setwd
+setwd("C:\\Users\\Jung\\Desktop\\빅데이터\\전상엽\\data")
+
+#Control group data import
+cg2012<-read.csv("NHIS_OPEN_GJ_2012.csv", header=T)
+cg2013<-read.csv("NHIS_OPEN_GJ_2012.csv", header=T)
+
+#Data import
+dataset1<-read.csv("대장암\ 환자2012.csv", header=T,stringsAsFactor=FALSE)
+dataset2<-read.csv("대장암\ 환자2013.csv", header=T,stringsAsFactor=F)
+
+
+#dataset 필요없는 칼럼 제거 
+dataset1<-dataset1[,c(1,2,3,4,6)]
+dataset2<-dataset2[,c(1,2,3,4,6)]
+str(dataset2)
+
+#dataset1 colnames, rbind
+colnames(dataset1)<-c("age","gender","height","weight","stage")
+colnames(dataset2)<-c("age","gender","height","weight","stage")
+
+dataset<-rbind(dataset1,dataset2)
+
+
+#dataset에 year 항목 추가 
+dataset$year<-c(2012)
+str(dataset)
+
+#dataset 결측치 제거 
+
+sum(dataset$age=="기록없음")
+sum(dataset$gender=="기록없음")
+sum(dataset$height=="기록없음")
+sum(dataset$weight=="기록없음")
+sum(dataset$year=="기록없음")
+sum(dataset$stage=="기록없음")
+
+dataset$height[dataset$height=="기록없음"]<-NA
+dataset$weight[dataset$weight=="기록없음"]<-NA
+dataset$stage[dataset$stage=="기록없음"]<-NA
+
+dataset<-na.omit(dataset)
+
+#이상치 제거 
+which(dataset$age<20)
+dataset<-dataset[-c(5410,21267,23038),]
+
+
+#dataset의 height,weight 범주화
+dataset$height[dataset$height >= 100 & dataset$height < 105] <- 100
+dataset$height[dataset$height >= 105 & dataset$height < 110] <- 105
+dataset$height[dataset$height >= 110 & dataset$height < 115] <- 110
+dataset$height[dataset$height >= 115 & dataset$height < 120] <- 115
+dataset$height[dataset$height >= 120 & dataset$height < 125] <- 120
+dataset$height[dataset$height >= 125 & dataset$height < 130] <- 125
+dataset$height[dataset$height >= 130 & dataset$height < 135] <- 130
+dataset$height[dataset$height >= 135 & dataset$height < 140] <- 135
+dataset$height[dataset$height >= 140 & dataset$height < 145] <- 140
+dataset$height[dataset$height >= 145 & dataset$height < 150] <- 145
+dataset$height[dataset$height >= 150 & dataset$height < 155] <- 150
+dataset$height[dataset$height >= 155 & dataset$height < 160] <- 155
+dataset$height[dataset$height >= 160 & dataset$height < 165] <- 160
+dataset$height[dataset$height >= 165 & dataset$height < 170] <- 165
+dataset$height[dataset$height >= 170 & dataset$height < 175] <- 170
+dataset$height[dataset$height >= 175 & dataset$height < 180] <- 175
+dataset$height[dataset$height >= 180 & dataset$height < 185] <- 180
+dataset$height[dataset$height >= 185 & dataset$height < 190] <- 185
+dataset$height[dataset$height >= 190 & dataset$height < 195] <- 190
+dataset$height[dataset$height >= 195] <- 195
+sort(unique(dataset$height))
+
+dataset$weight<-as.numeric(dataset$weight)#character로 변환시키면 95이상 100미만이 벼환이 안되는데
+#numeric으로 타입변환 후 변환시키면 변환이 가능하다. 
+dataset$weight[dataset$weight >= 25 & dataset$weight < 30] <- 25
+dataset$weight[dataset$weight >= 30 & dataset$weight < 35] <- 30
+dataset$weight[dataset$weight >= 35 & dataset$weight < 40] <- 35
+dataset$weight[dataset$weight >= 40 & dataset$weight < 45] <- 40
+dataset$weight[dataset$weight >= 45 & dataset$weight < 50] <- 45
+dataset$weight[dataset$weight >= 50 & dataset$weight < 55] <- 50
+dataset$weight[dataset$weight >= 55 & dataset$weight < 60] <- 55
+dataset$weight[dataset$weight >= 60 & dataset$weight < 65] <- 60
+dataset$weight[dataset$weight >= 65 & dataset$weight < 70] <- 65
+dataset$weight[dataset$weight >= 70 & dataset$weight < 75] <- 70
+dataset$weight[dataset$weight >= 75 & dataset$weight < 80] <- 75
+dataset$weight[dataset$weight >= 80 & dataset$weight < 85] <- 80
+dataset$weight[dataset$weight >= 85 & dataset$weight < 90] <- 85
+dataset$weight[dataset$weight >= 90 & dataset$weight < 95] <- 90
+dataset$weight[dataset$weight >= 95 & dataset$weight < 100] <- 95
+dataset$weight[dataset$weight >= 100 & dataset$weight < 105] <- 100
+dataset$weight[dataset$weight >= 105 & dataset$weight < 110] <- 105
+dataset$weight[dataset$weight >= 110 & dataset$weight < 115] <- 110
+dataset$weight[dataset$weight >= 115 & dataset$weight < 120] <- 115
+dataset$weight[dataset$weight >= 120 & dataset$weight < 125] <- 120
+dataset$weight[dataset$weight >= 125 & dataset$weight < 130] <- 125
+sort(unique(dataset$weight))
+
+#dataset$age 범주화 
+dataset$age[dataset$age >= 20 & dataset$age < 25] <- "20-24"
+dataset$age[dataset$age >= 25 & dataset$age < 30] <- "25-29"
+dataset$age[dataset$age >= 30 & dataset$age < 35] <- "30-34"
+dataset$age[dataset$age >= 35 & dataset$age < 40] <- "35-39"
+dataset$age[dataset$age >= 40 & dataset$age < 45] <- "40-44"
+dataset$age[dataset$age >= 45 & dataset$age < 50] <- "45-49"
+dataset$age[dataset$age >= 50 & dataset$age < 55] <- "50-54"
+dataset$age[dataset$age >= 55 & dataset$age < 60] <- "55-59"
+dataset$age[dataset$age >= 60 & dataset$age < 65] <- "60-64"
+dataset$age[dataset$age >= 65 & dataset$age < 70] <- "65-69"
+dataset$age[dataset$age >= 70 & dataset$age < 75] <- "70-74"
+dataset$age[dataset$age >= 75 & dataset$age < 80] <- "75-79"
+dataset$age[dataset$age >= 80 & dataset$age < 85] <- "80-84"
+dataset$age[dataset$age >= 85] <- "85+"
+dataset$age[dataset$age == 102] <- "85+"
+sort(unique(dataset$age))
+
+#dataset$gender character 남, 여를 factor 1,2로 변환 
+str(dataset$gender)
+dataset$gender<-factor(dataset$gender, levels=c("남","여"), labels=c(1,2))
+
+#dataset$stage를 facter 1,2,3,4로 변환 
+dataset$stage<-factor(dataset$stage, levels=c("I","II","III","IV"), labels=c(1,2,3,4))
+str(dataset$stage)
+
+#cancer칼럼 추가
+dataset$cancer<-1
+dataset$cancer
+
+#####################################
+#Control group dataframe화 및 year 칼럼추가, rbind
+cg2012_1<-data.frame(cg2012$연령대코드.5세단위.,cg2012$성별코드,cg2012$신장.5Cm단위.,cg2012$체중.5Kg.단위.)
+cg2013_1<-data.frame(cg2013$연령대코드.5세단위.,cg2013$성별코드,cg2013$신장.5Cm단위.,cg2013$체중.5Kg.단위.)
+
+colnames(cg2012_1)<-c("age","gender","height","weight")
+colnames(cg2013_1)<-c("age","gender","height","weight")
+
+cg2012_1$year<-c(2012)
+cg2013_1$year<-c(2013)
+
+cg<-rbind(cg2012_1, cg2013_1)
+
+#Control group에 stage 칼럼추가 
+cg$stage<-c(0)
+
+#Control group에 cancer 칼럼추가 
+cg$cancer<-c(0)
+
+#control group의 age 변환 
+unique(cg$age)
+cg$age[cg$age==1]<-"20-24"
+cg$age[cg$age==2]<-"25-29"
+cg$age[cg$age==3]<-"30-34"
+cg$age[cg$age==4]<-"35-39"
+cg$age[cg$age==5]<-"40-44"
+cg$age[cg$age==6]<-"45-49"
+cg$age[cg$age==7]<-"50-54"
+cg$age[cg$age==8]<-"55-59"
+cg$age[cg$age==9]<-"60-64"
+cg$age[cg$age==10]<-"65-69"
+cg$age[cg$age==11]<-"70-74"
+cg$age[cg$age==12]<-"75-79"
+cg$age[cg$age==13]<-"80-84"
+cg$age[cg$age==14]<-"85+"
+
+
+#dataset&cg rbind
+
+str(cg)
+str(dataset)
+
+project<-rbind(cg,dataset)
+
+#타입변환
+unique(project$age)
+unique(project$gender)
+unique(project$height)
+unique(project$weight)
+unique(project$year)
+unique(project$stage)
+
+
+project$gender<-as.factor(project$gender)
+project$stage<-as.factor(project$stage)
+project$height<-as.numeric(project$height)
+str(project)
+
+#bmi1, bmi2 
+
+project$bmi<-round(project$weight/(project$height/100)**2, 2)
+
+project$bmi2[project$bmi < 18.5] <- 1
+project$bmi2[project$bmi >= 18.5 & project$bmi < 23] <- 2
+project$bmi2[project$bmi >= 23 & project$bmi < 25] <- 3
+project$bmi2[project$bmi >= 25 & project$bmi < 30] <- 4
+project$bmi2[project$bmi >= 30 & project$bmi < 35] <- 5
+project$bmi2[project$bmi >= 35] <- 6
+
+project$bmi2 <- factor(project$bmi2, levels = c(1:6), 
+                     labels = c("underweight", "normal", "overweight", 
+                                "obese1", "obese2", "obese3"))
+
+#column 정렬
+project<-project[,c(5,1,2,3,4,8,9,7,6)]
+str(project)
+
+#column type 재정의
+project_final<-transform(project,year=as.integer(year),age=factor(age),cancer=factor(cancer))
+str(project_final)
+
+#export data
+write.csv(project_final,"semi_p.csv",row.names=F)
+
+
+str(project_final)
+
+
+write.csv(project_final, "p.csv",row.names = F)
+
+
+
+
+
