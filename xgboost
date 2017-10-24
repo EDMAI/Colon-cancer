@@ -1,0 +1,95 @@
+import pandas as pd, numpy as np
+from sklearn import model_selection
+from xgboost import XGBClassifier # model 생성 클래스 
+from xgboost import plot_importance # 중요변수 시각화 클래스  
+
+from matplotlib import pyplot
+# chart에서 한글 표시
+from matplotlib import font_manager, rc
+font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
+# 폰트를 설정해서 차트내에서 한글이 깨지지 않게 해준다. 
+rc('font', family=font_name)
+import time # 수행 시간 
+
+# updf = pd.read_csv("../data/updf.csv",encoding="MS949", one_hot=True)
+updf = pd.read_csv("../data/Data_set_nostar.csv",encoding="MS949",thousands=',')
+print(updf.info())
+
+
+
+print("="*60)
+coln=list(updf.columns)
+print(coln)
+updf.columns=coln
+
+
+
+
+
+
+
+
+
+
+## 동파유무1,0 갯수맞추기
+updf1 = updf[updf['TARGET']==1]
+updf0 = updf[updf['TARGET']==0]
+print("연체:",updf1.shape)
+print("비연체0:",updf0.shape)
+split0, split0_cntrol = model_selection.train_test_split(updf0,test_size=0.1)
+print("split0:",split0.shape)
+print("split0_cntrol:",split0_cntrol.shape)
+updf = pd.concat([updf1,split0_cntrol])
+print("모델 생성을 위해 사용하는 updf shape:",updf.shape)
+'''
+동파1: (2959, 95)
+동파0: (34130, 95)
+split0: (30717, 95)
+split0_cntrol: (3413, 95)
+모델 생성을 위해 사용하는 updf shape: (6372, 95)
+'''
+
+chktime=time.time()
+
+
+# dataset 생성 
+print("이것 중에서 다시 40퍼센트를 추린것을 실제 모델생성에 사용함.")
+train_set, test_set = model_selection.train_test_split(updf,test_size=0.4)
+reference = pd.concat([test_set,split0])
+print("train_set 사이즈:",train_set.shape) # (3823, 95)
+print("최종 reference 사이즈:",reference.shape) # (33266, 95)
+oriCol=list(updf.columns)
+y_name=oriCol.pop(0)
+x_name=oriCol
+print("기존 x변수 개수:",len(x_name)) # 94
+
+# XGBOOST
+updf_XGB = XGBClassifier()
+# train data 이용 model 생성 
+updf_XGB.fit(train_set[x_name][:],train_set[y_name])
+# test data 이용 예측치 생성 
+pred = updf_XGB.predict(reference[x_name][:]) # 격리해둔 검증데이터
+
+# 중요변수 확인 
+fscore = updf_XGB.get_booster().get_fscore()
+print("fscore:",fscore)
+print('len=', len(fscore)) # len= 51
+print('updf_XGB=',updf_XGB)
+
+# 중요변수 시각화
+plot_importance(updf_XGB) # fscore 기준  내림차순 52변수 시각화 
+pyplot.show()
+
+
+# confusion matrix 
+con_mat=pd.crosstab(pred,reference[y_name],rownames=["예측치"],colnames=["관측치"])
+refConNp=np.array(con_mat)
+
+print("="*60)
+chktime=time.time()-chktime
+
+print("실행시간 : ",chktime)
+print("분류결과")
+print(con_mat)
+print("분류정확도 : ",round(refConNp.trace()/refConNp.sum(),7))
+print("실제값 Y=1에 대한 재현율 : ", round( refConNp[1,1]/refConNp[:,1].sum() ,7))
