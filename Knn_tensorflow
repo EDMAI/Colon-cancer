@@ -1,0 +1,43 @@
+'''
+K-Nearest Neighbor 알고리즘 
+  - Euclidean 거리계산식
+  - sample data 이용 
+'''
+import numpy as np
+import tensorflow as tf
+
+# x : 분류집단 
+p1 = [1.2, 1.1] 
+p2 = [1.0, 1.0]
+p3 = [1.8, 0.8]
+p4 = [2, 0.9]
+
+x_data = np.array([p1, p2, p3, p4])
+label = ['A','A','B','B'] # 분류범주(Y변수)
+
+y_data = [1.6, 0.85] # y : 분류대상 
+
+# x,y 변수 선언 
+x = tf.placeholder(tf.float32, shape=[None, 2]) # [n, 2개 원소]
+y = tf.placeholder(tf.float32, shape=[2]) # [1개 원소]
+
+
+# Euclidean 거리계산식 = sqrt( sum( (x-y)^2 ) )
+distance = tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(x, y)), 
+                                 reduction_indices=1))
+# 가장 가까운 거리 index 반환 
+dist_idx = tf.arg_min(distance, 0) # input, dimension
+
+with tf.Session() as sess:  
+    # kNN 분류결과  
+    idx = sess.run(dist_idx, feed_dict={x:x_data, y: y_data})
+    print('분류 index :', idx)        
+    print('분류결과  : ', label[idx]) #분류 결과 : B
+    
+    distance=sess.run(distance, feed_dict={x:x_data,y:y_data})
+    print(distance) #[ 0.47169903  0.61846584  0.20615523  0.40311286]
+    print('argmin=', sess.run(tf.argmin(distance))) # argmin = 2
+    print('argmax=', sess.run(tf.argmax(distance))) # argmax = 1
+    
+# np.argmax : 가장 큰 값의 index 반환 
+#print(np.argmax([ 0.,  0.,  1.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])) # 2  
